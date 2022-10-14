@@ -1,4 +1,4 @@
-import { getAuth, signInWithEmailAndPassword } from 'firebase/auth';
+import { getAuth, sendPasswordResetEmail, signInWithEmailAndPassword } from 'firebase/auth';
 import React, { useState } from 'react';
 import { Link } from 'react-router-dom';
 import app from '../../firebase/firebase.init';
@@ -6,7 +6,8 @@ const auth = getAuth(app);
 
 const Login = () => {
 
-    const [success, setSuccess]= useState(false)
+    const [success, setSuccess] = useState(false)
+    const [userEmail, setUserEmail]= useState('')
     const handelSubmit = event => {
         setSuccess(false)
 
@@ -26,13 +27,33 @@ const Login = () => {
         
 
     }
+
+    const handelForgetPassword = () => {
+        if (!userEmail) {
+            alert('please enter your email address')
+            return;
+        }
+        sendPasswordResetEmail(auth, userEmail)
+            .then(() => {
+            alert('password reset email sent, please check your email.')
+            })
+            .catch(error => {
+            console.error(error)
+        })
+    }
+    const handelEmailBlur = (event) => {
+        const email = event.target.value;
+        setUserEmail(email);
+        console.log(email)
+    }
+
     return (
         <div className='w-50 mx-auto'>
             <h1 className='text-primary'>Please Log in</h1>
             <form onSubmit={handelSubmit}>
                 <div className="mb-3">
                     <label htmlFor=''for="exampleInputEmail1" className="form-label">Email address</label>
-                    <input type="email" name="email" className="form-control" id="exampleInputEmail1" aria-describedby="emailHelp" placeholder='Your Email' required />
+                    <input onBlur={handelEmailBlur} type="email" name="email" className="form-control" id="exampleInputEmail1" aria-describedby="emailHelp" placeholder='Your Email' required />
                     
                 </div>
                 <div className="mb-3">
@@ -47,7 +68,7 @@ const Login = () => {
                 success && <p className='text-primary'>SuccessFully log in to  the account</p>
             }
             <small>  <p>New to this website ? please <Link to='/register'>Register</Link></p></small>
-            <p>Forget Password ? <button onClick={handelForgetPassword} type="button" className="btn btn-link">Please Reset</button> </p>
+            <p> <small>Forget Password ? <button onClick={handelForgetPassword} type="button" className="btn btn-link">Reset Password</button></small> </p>
            
         </div>
     );
